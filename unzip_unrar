@@ -1,0 +1,67 @@
+######### FOR ZIP
+# Instalar paquetes si no están instalados
+if (!require("utils")) install.packages("utils")
+
+# Definir directorios
+carpeta_zip <- "ruta/a/los/archivos_zip"   # Cambiar a la ruta donde están los .zip
+carpeta_salida <- "ruta/a/carpeta_general" # Cambiar a la carpeta general de destino
+
+# Crear la carpeta general si no existe
+if (!dir.exists(carpeta_salida)) {
+  dir.create(carpeta_salida, recursive = TRUE)
+}
+
+# Obtener lista de archivos .zip
+archivos_zip <- list.files(path = carpeta_zip, pattern = "\\.zip$", full.names = TRUE)
+
+# Iterar sobre los archivos .zip y descomprimirlos
+for (archivo in archivos_zip) {
+  # Nombre base del archivo (sin extensión)
+  nombre_carpeta <- tools::file_path_sans_ext(basename(archivo))
+  
+  # Ruta de la carpeta específica para este archivo
+  ruta_carpeta <- file.path(carpeta_salida, nombre_carpeta)
+  
+  # Crear la carpeta específica si no existe
+  if (!dir.exists(ruta_carpeta)) {
+    dir.create(ruta_carpeta)
+  }
+  
+  # Descomprimir el archivo .zip en la carpeta específica
+  unzip(archivo, exdir = ruta_carpeta)
+  
+  cat("Archivo descomprimido:", archivo, "en la carpeta:", ruta_carpeta, "\n")
+}
+
+cat("Proceso completado. Archivos descomprimidos en:", carpeta_salida, "\n")
+
+######### FOR RAR
+# install.packages("archive")
+
+library(archive)
+
+# Definir carpeta donde están los .rar
+carpeta_origen <- "C:/ruta/a/tu/carpeta_con_rar"
+# Definir carpeta general donde se guardarán las descompresiones
+carpeta_destino <- "C:/ruta/a/carpeta_general"
+
+# Crear carpeta destino si no existe
+if(!dir.exists(carpeta_destino)) dir.create(carpeta_destino)
+
+# Listar todos los archivos .rar
+archivos_rar <- list.files(carpeta_origen, pattern = "\\.rar$", full.names = TRUE)
+
+# Iterar sobre cada archivo y descomprimir
+for (archivo in archivos_rar) {
+  # Nombre base del archivo sin extensión
+  nombre_base <- tools::file_path_sans_ext(basename(archivo))
+  
+  # Carpeta específica para este archivo dentro de la carpeta general
+  carpeta_individual <- file.path(carpeta_destino, nombre_base)
+  if(!dir.exists(carpeta_individual)) dir.create(carpeta_individual)
+  
+  # Extraer contenido
+  archive_extract(archivo, dir = carpeta_individual)
+  
+  cat("Archivo", basename(archivo), "descomprimido en", carpeta_individual, "\n")
+}
