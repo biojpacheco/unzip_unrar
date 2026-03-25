@@ -36,32 +36,38 @@ for (archivo in archivos_zip) {
 cat("Proceso completado. Archivos descomprimidos en:", carpeta_salida, "\n")
 
 ######### FOR RAR
-# install.packages("archive")
-
+install.packages("archive")
 library(archive)
 
-# Definir carpeta donde están los .rar
-carpeta_origen <- "C:/ruta/a/tu/carpeta_con_rar"
-# Definir carpeta general donde se guardarán las descompresiones
-carpeta_destino <- "C:/ruta/a/carpeta_general"
+# 1. Configuración de rutas
+ruta_origen <- "D:/Proyectos_Consult/Bioconsulting/Meche"
+ruta_destino_general <- "D:/Proyectos_Consult/Bioconsulting/Meche_output"
 
-# Crear carpeta destino si no existe
-if(!dir.exists(carpeta_destino)) dir.create(carpeta_destino)
-
-# Listar todos los archivos .rar
-archivos_rar <- list.files(carpeta_origen, pattern = "\\.rar$", full.names = TRUE)
-
-# Iterar sobre cada archivo y descomprimir
-for (archivo in archivos_rar) {
-  # Nombre base del archivo sin extensión
-  nombre_base <- tools::file_path_sans_ext(basename(archivo))
-  
-  # Carpeta específica para este archivo dentro de la carpeta general
-  carpeta_individual <- file.path(carpeta_destino, nombre_base)
-  if(!dir.exists(carpeta_individual)) dir.create(carpeta_individual)
-  
-  # Extraer contenido
-  archive_extract(archivo, dir = carpeta_individual)
-  
-  cat("Archivo", basename(archivo), "descomprimido en", carpeta_individual, "\n")
+# Crear la carpeta general si no existe
+if (!dir.exists(ruta_destino_general)) {
+  dir.create(ruta_destino_general, recursive = TRUE)
 }
+
+# 2. Listar todos los archivos .rar
+archivos_rar <- list.files(path = ruta_origen, pattern = "\\.rar$", full.names = TRUE)
+
+# 3. Proceso de descompresión automática
+lapply(archivos_rar, function(archivo) {
+  
+  # Crear un nombre de subcarpeta basado en el nombre del archivo (sin extensión)
+  nombre_sin_ext <- tools::file_path_sans_ext(basename(archivo))
+  carpeta_especifica <- file.path(ruta_destino_general, nombre_sin_ext)
+  
+  # Crear la subcarpeta si no existe
+  if (!dir.exists(carpeta_especifica)) {
+    dir.create(carpeta_especifica)
+  }
+  
+  # Descomprimir
+  tryCatch({
+    archive_extract(archivo, dir = carpeta_especifica)
+    message(paste("Exitoso:", nombre_sin_ext))
+  }, error = function(e) {
+    message(paste("Error en:", nombre_sin_ext, "-", e$message))
+  })
+})
